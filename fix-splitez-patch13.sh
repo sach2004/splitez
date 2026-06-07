@@ -1,3 +1,29 @@
+#!/usr/bin/env bash
+# =============================================================================
+# fix-splitez-patch13.sh  —  Run from project root
+#
+# Fix: on a group page with many members/expenses, the last names hide behind
+# the fixed bottom action sheet and can't be scrolled into view.
+#
+# WHY: globals.css defines `.app-content { padding: 20px 18px 128px }` AFTER
+# @tailwind utilities. So the Tailwind override `pb-[calc(320px+...)]` loses
+# the cascade and the real bottom padding stays 128px — too short to clear the
+# ~290px action sheet. The bottom of the list ends up behind the static sheet.
+#
+# FIX: set the bottom padding with an INLINE style (beats any stylesheet rule),
+# so the scroll area always reserves enough room to scroll past the sheet.
+# =============================================================================
+set -euo pipefail
+
+GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
+ok()   { echo -e "${GREEN}✔ $1${NC}"; }
+info() { echo -e "${YELLOW}→ $1${NC}"; }
+
+[[ -f "package.json" ]] || { echo "Run from project root"; exit 1; }
+
+info "Rewriting app/groups/[groupId]/page.tsx (inline bottom padding)..."
+mkdir -p "app/groups/[groupId]"
+cat > "app/groups/[groupId]/page.tsx" << 'TSX'
 import { notFound } from "next/navigation";
 import { ArrowLeft, Plus, UserRoundPlus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -92,3 +118,21 @@ function SheetLink({ href, icon, label }: { href: string; icon: React.ReactNode;
     </HapticLink>
   );
 }
+TSX
+ok "group detail page fixed"
+
+echo ""
+echo -e "${GREEN}╔════════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║  Patch 13 done — names scroll clear of the sheet now.          ║${NC}"
+echo -e "${GREEN}╠════════════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║  CAUSE: .app-content's shorthand 'padding: …128px' (defined    ║${NC}"
+echo -e "${GREEN}║  after Tailwind utilities) overrode the pb-[320px] class, so   ║${NC}"
+echo -e "${GREEN}║  the list only had 128px of bottom room — less than the ~290px ║${NC}"
+echo -e "${GREEN}║  fixed sheet. The last names sat behind it, unreachable.       ║${NC}"
+echo -e "${GREEN}║                                                                ║${NC}"
+echo -e "${GREEN}║  FIX: paddingBottom is now an INLINE style (beats the          ║${NC}"
+echo -e "${GREEN}║  stylesheet), reserving 330px so you can scroll every name     ║${NC}"
+echo -e "${GREEN}║  above the static sheet.                                       ║${NC}"
+echo -e "${GREEN}╠════════════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║  Restart:  npm run dev                                         ║${NC}"
+echo -e "${GREEN}╚════════════════════════════════════════════════════════════════╝${NC}"
