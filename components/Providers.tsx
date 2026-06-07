@@ -8,7 +8,9 @@ import NavProgress from "@/components/NavProgress";
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+      {/* defaultTheme="dark" => everyone starts in dark mode.
+          enableSystem stays false so it doesn't follow the OS setting. */}
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
         {children}
         <NavProgress />
         <Toaster />
