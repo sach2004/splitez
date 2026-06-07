@@ -1,0 +1,2 @@
+import type { Config } from "tailwindcss";
+export default { darkMode: "class", content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"], theme: { extend: { colors: { mint: {50:"#edf8f4",100:"#dcefe9",200:"#bde0d7",300:"#93ccc0",400:"#43b9a3",500:"#11ad93",600:"#07856f",700:"#057964",800:"#066251",900:"#064f43"}, ink:"#111416", fog:"#f7f8f5" }, boxShadow: { soft:"0 18px 45px rgba(9, 99, 80, 0.10)" } } }, plugins: [] } satisfies Config;
