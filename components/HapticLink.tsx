@@ -2,24 +2,29 @@
 
 import Link, { type LinkProps } from "next/link";
 import * as React from "react";
-import { useWebHaptics } from "web-haptics/react";
+import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 
 type HapticLinkProps = LinkProps & {
   children: React.ReactNode;
   className?: string;
-  haptic?: boolean;
+  hapticFeedback?: boolean;
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 };
 
-export function HapticLink({ children, className, haptic = true, onClick, ...props }: HapticLinkProps) {
-  const { trigger } = useWebHaptics();
+export function HapticLink({
+  children,
+  className,
+  hapticFeedback = true,
+  onClick,
+  ...props
+}: HapticLinkProps) {
   return (
     <Link
       {...props}
       className={cn("tap-scale", className)}
       onClick={(event) => {
-        if (haptic) trigger();
+        if (hapticFeedback) haptic();
         onClick?.(event);
       }}
     >

@@ -4,16 +4,63 @@ import { useRouter } from "next/navigation";
 import { HapticButton } from "@/components/HapticButton";
 import { getGuestSessionId } from "@/lib/guest";
 
-export default function Join({ params }: { params: Promise<{ groupId: string }> }) {
+export default function Join({
+  params,
+}: {
+  params: Promise<{ groupId: string }>;
+}) {
   const { groupId } = use(params);
-  const [name, setName] = useState("");
+  const [name, setName]       = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
   async function join() {
-    if (!name.trim() || loading) return;
+    const trimmed = name.trim();
+    if (!trimmed) return alert("Enter your name");
+    if (loading) return;
     setLoading(true);
-    await fetch(`/api/groups/${groupId}/members`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isGuest: true, name, guestSessionId: getGuestSessionId() }) });
-    router.push(`/groups/${groupId}`);
+    try {
+      const res = await fetch(`/api/groups/${groupId}/members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isGuest: true,
+          name: trimmed,
+          guestSessionId: getGuestSessionId(),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to join");
+      router.push(`/groups/${groupId}`);
+    } catch {
+      setLoading(false);
+    }
   }
-  return <main className="app-shell"><div className="form-content pt-16"><h1 className="page-title">Join group</h1><p className="mt-3 text-[16px] text-neutral-600">Enter your name to join as a guest.</p><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="input-field mt-8 h-14 px-4 text-xl" /><HapticButton onClick={join} loading={loading} loadingText="Joining..." className="btn-primary mt-6 w-full text-lg">Join</HapticButton></div></main>;
+
+  return (
+    <main className="app-shell">
+      <div className="form-content pt-16">
+        <h1 className="page-title">Join group</h1>
+        <p className="mt-3 text-[15px] text-[var(--muted)]">
+          Enter your name to join as a guest — no sign-up needed.
+        </p>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your name"
+          disabled={loading}
+          className="input-field mt-7 h-[52px] px-4"
+          autoFocus
+          onKeyDown={(e) => e.key === "Enter" && join()}
+        />
+        <HapticButton
+          onClick={join}
+          loading={loading}
+          loadingText="Joining…"
+          className="btn-primary mt-5 w-full text-[15px]"
+        >
+          Join Group
+        </HapticButton>
+      </div>
+    </main>
+  );
 }

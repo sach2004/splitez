@@ -10,26 +10,37 @@ import { initials, money } from "@/lib/utils";
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
-  const userId = (session?.user as any)?.id;
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  const firstName = (session?.user?.name || "there").split(" ")[0];
+
   const groups = userId
-    ? await prisma.group.findMany({ where: { members: { some: { userId } } }, include: { members: true, expenses: true }, take: 3, orderBy: { createdAt: "desc" } })
+    ? await prisma.group.findMany({
+        where: { members: { some: { userId } } },
+        include: { members: true, expenses: true },
+        take: 3,
+        orderBy: { createdAt: "desc" },
+      })
     : [];
 
   return (
     <AppFrame>
       <Logo />
-      <section className="mt-8">
+
+      <p className="mt-6 text-[15px] text-[var(--muted)]">Welcome back,</p>
+      <h1 className="text-[28px] font-black tracking-tight">{firstName}</h1>
+
+      <section className="mt-5">
         <Card className="p-6">
           <div className="page-eyebrow">Total Balance</div>
-          <div className="mt-4 text-[52px] font-black leading-none tracking-[-.05em]">₹0.00</div>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="rounded-[18px] bg-neutral-100 p-4 dark:bg-neutral-800">
-              <p className="text-[15px] font-medium text-neutral-600 dark:text-neutral-300">You're owed</p>
-              <p className="mt-2 text-[26px] font-black text-mint-400">₹0.00</p>
+          <div className="mt-3 text-[48px] font-black leading-none tracking-[-.05em]">₹0.00</div>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="rounded-[16px] bg-[var(--soft)] p-4">
+              <p className="text-[14px] font-medium text-[var(--muted)]">You&apos;re owed</p>
+              <p className="mt-1.5 text-[24px] font-black text-mint-500">₹0.00</p>
             </div>
-            <div className="rounded-[18px] bg-neutral-100 p-4 dark:bg-neutral-800">
-              <p className="text-[15px] font-medium text-neutral-600 dark:text-neutral-300">You owe</p>
-              <p className="mt-2 text-[26px] font-black text-red-400">₹0.00</p>
+            <div className="rounded-[16px] bg-[var(--soft)] p-4">
+              <p className="text-[14px] font-medium text-[var(--muted)]">You owe</p>
+              <p className="mt-1.5 text-[24px] font-black text-red-400">₹0.00</p>
             </div>
           </div>
         </Card>
@@ -37,23 +48,32 @@ export default async function Dashboard() {
 
       {groups.length > 0 && (
         <Card className="mt-5 p-5">
-          <h2 className="text-[25px] font-black tracking-[-.03em]">Top Groups</h2>
-          <div className="mt-5 space-y-2">
+          <h2 className="text-[20px] font-black tracking-tight">Your groups</h2>
+          <div className="mt-4 space-y-1">
             {groups.map((g) => (
-              <HapticLink href={`/groups/${g.id}`} key={g.id} className="flex items-center justify-between rounded-[18px] p-2 hover:bg-neutral-50 dark:hover:bg-neutral-800">
+              <HapticLink
+                href={`/groups/${g.id}`}
+                key={g.id}
+                className="flex items-center justify-between rounded-[16px] p-2 hover:bg-[var(--soft)]"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="grid h-12 w-12 place-items-center rounded-[15px] bg-neutral-100 text-lg font-black text-mint-700 dark:bg-neutral-800">{initials(g.name)}</div>
-                  <div><div className="text-lg font-black">{g.name}</div><div className="text-sm text-neutral-500">{g.members.length} members</div></div>
+                  <div className="grid h-11 w-11 place-items-center rounded-[14px] bg-[var(--soft)] text-[16px] font-black text-mint-700">
+                    {initials(g.name)}
+                  </div>
+                  <div>
+                    <div className="text-[16px] font-black">{g.name}</div>
+                    <div className="text-[13px] text-[var(--muted)]">{g.members.length} members</div>
+                  </div>
                 </div>
-                <div className="text-lg font-black text-mint-600">+{money(0)}</div>
+                <div className="text-[15px] font-black text-mint-600">{money(0)}</div>
               </HapticLink>
             ))}
           </div>
         </Card>
       )}
 
-      <h1 className="section-title mt-8">Recent Activity</h1>
-      <EmptyState subtitle="No recent activity" compact />
+      <h2 className="section-title mt-7">Recent activity</h2>
+      <EmptyState subtitle="No recent activity yet" compact />
     </AppFrame>
   );
 }

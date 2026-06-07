@@ -2,15 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --background: #f8faf5;
+  --background: #f7f9f5;
   --foreground: #101413;
   --card: #ffffff;
   --muted: #6b7471;
-  --line: #e5ebe7;
-  --soft: #f1f4f0;
+  --line: #e3e9e5;
+  --soft: #eef1ed;
   --mint: #057964;
   --mint2: #43b9a3;
+
+  /* typography scale — rem-based so it stays sane at any system font size */
+  --text-xs:   0.6875rem;  /* 11px */
+  --text-sm:   0.8125rem;  /* 13px */
+  --text-base: 0.9375rem;  /* 15px */
+  --text-md:   1rem;       /* 16px */
+  --text-lg:   1.0625rem;  /* 17px */
+  --text-xl:   1.125rem;   /* 18px */
+  --text-2xl:  1.375rem;   /* 22px */
+  --text-3xl:  1.5625rem;  /* 25px */
+  --text-4xl:  1.75rem;    /* 28px */
 }
 
 .dark {
@@ -22,29 +34,49 @@
   --soft: #202623;
 }
 
-* { box-sizing: border-box; }
+/* ── Reset / base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
 html {
+  /* Critical: prevent iOS auto-zoom on input focus */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   min-height: 100%;
   background: var(--background);
   color-scheme: light;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  /* Lock font size to exactly what we set — no browser scaling */
+  font-size: 16px;
 }
 html.dark { color-scheme: dark; }
+
 body {
   min-height: 100dvh;
   margin: 0;
   overflow-x: hidden;
   background: var(--background);
   color: var(--foreground);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+               ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Prevent the 300ms tap delay on iOS */
+  touch-action: manipulation;
 }
+
 input, button, textarea, select { font: inherit; }
-button, a { -webkit-tap-highlight-color: transparent; }
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 button:disabled { cursor: not-allowed; }
 
+/* Inputs >= 16px font-size prevent iOS auto-zoom */
+input, textarea, select {
+  font-size: max(16px, 1em);
+}
+
+/* ── App shell ─────────────────────────────────────────────────────────────── */
 .app-shell {
   width: min(100vw, 430px);
   min-height: 100dvh;
@@ -52,108 +84,191 @@ button:disabled { cursor: not-allowed; }
   position: relative;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 100% 8%, rgba(67,185,163,.08), transparent 28%),
+    radial-gradient(circle at 100% 8%, rgba(67,185,163,.07), transparent 26%),
     var(--background);
 }
 
 .app-content {
   min-height: 100dvh;
-  padding: 24px 20px calc(132px + env(safe-area-inset-bottom));
+  /* bottom padding accounts for FAB + nav + safe area */
+  padding: 20px 18px calc(128px + env(safe-area-inset-bottom));
 }
 
 .form-content {
   min-height: 100dvh;
-  padding: 22px 20px calc(30px + env(safe-area-inset-bottom));
+  padding: 20px 18px calc(32px + env(safe-area-inset-bottom));
 }
 
-@media (max-width: 370px) {
-  .app-content, .form-content { padding-left: 16px; padding-right: 16px; }
+@media (max-width: 374px) {
+  .app-content, .form-content { padding-left: 14px; padding-right: 14px; }
 }
 
+/* ── Scrollbar hide ────────────────────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ── Typography ────────────────────────────────────────────────────────────── */
 .page-eyebrow {
-  font-size: 11px;
+  font-size: var(--text-xs);
   line-height: 1;
   font-weight: 900;
-  letter-spacing: .38em;
+  letter-spacing: .34em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .page-title {
-  font-size: clamp(34px, 10vw, 44px);
-  line-height: .98;
+  /* Clamp keeps it readable on 320px AND 430px screens */
+  font-size: clamp(2rem, 9vw, 2.625rem);
+  line-height: .97;
   letter-spacing: -.045em;
   font-weight: 950;
 }
 
 .section-title {
-  font-size: clamp(25px, 7.2vw, 30px);
+  font-size: clamp(1.5rem, 6.5vw, 1.875rem);
   line-height: 1.05;
   letter-spacing: -.04em;
   font-weight: 950;
 }
 
+/* ── Cards ─────────────────────────────────────────────────────────────────── */
 .app-card {
-  border-radius: 22px;
+  border-radius: 20px;
   background: var(--card);
-  border: 1px solid rgba(16, 24, 20, .055);
-  box-shadow: 0 10px 28px rgba(16, 24, 20, .055);
+  border: 1px solid rgba(16, 24, 20, .05);
+  box-shadow: 0 8px 24px rgba(16, 24, 20, .05);
 }
-.dark .app-card { border-color: rgba(255,255,255,.055); box-shadow: none; }
+.dark .app-card {
+  border-color: rgba(255,255,255,.05);
+  box-shadow: none;
+}
 
-.tap-scale { transition: transform .14s ease, opacity .14s ease, background-color .14s ease; }
-.tap-scale:active { transform: scale(.975); opacity: .9; }
+/* ── Interactions ───────────────────────────────────────────────────────────── */
+.tap-scale {
+  transition: transform .13s ease, opacity .13s ease, background-color .15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.tap-scale:active { transform: scale(.97); opacity: .88; }
 
+/* ── Form inputs ────────────────────────────────────────────────────────────── */
 .input-field {
   width: 100%;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--card) 78%, transparent);
+  border-radius: 16px;
+  border: 1.5px solid var(--line);
+  background: color-mix(in srgb, var(--card) 85%, transparent);
   color: var(--foreground);
   outline: none;
-  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+  /* font-size >= 16px is critical — prevents iOS zoom on focus */
+  font-size: 16px;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
+.input-field::placeholder { color: var(--muted); opacity: .75; }
 .input-field:focus {
-  border-color: rgba(5,121,100,.65);
-  box-shadow: 0 0 0 4px rgba(5,121,100,.10);
+  border-color: rgba(5,121,100,.6);
+  box-shadow: 0 0 0 4px rgba(5,121,100,.09);
 }
 
+/* ── Buttons ────────────────────────────────────────────────────────────────── */
 .btn-primary {
-  min-height: 46px;
-  border-radius: 17px;
+  min-height: 48px;
+  border-radius: 16px;
   background: linear-gradient(90deg, var(--mint), var(--mint2));
   color: white;
   font-weight: 900;
-  box-shadow: 0 12px 28px rgba(5,121,100,.20);
+  font-size: var(--text-base);
+  box-shadow: 0 10px 26px rgba(5,121,100,.22);
+  transition: opacity .13s ease, transform .13s ease, box-shadow .13s ease;
+}
+.btn-primary:active {
+  opacity: .9;
+  transform: scale(.975);
+  box-shadow: 0 4px 12px rgba(5,121,100,.18);
+}
+.btn-primary:disabled {
+  opacity: .55;
+  box-shadow: none;
 }
 
 .btn-secondary {
   min-height: 44px;
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--soft);
   color: var(--foreground);
   font-weight: 850;
+  font-size: var(--text-base);
+  border: 1.5px solid var(--line);
+  transition: background-color .13s ease, opacity .13s ease;
 }
+.btn-secondary:active { opacity: .8; }
 
+/* ── Icon tiles ─────────────────────────────────────────────────────────────── */
 .icon-tile {
-  border-radius: 18px;
+  border-radius: 16px;
   background: var(--soft);
   color: var(--muted);
 }
 
+/* ── Spinner ────────────────────────────────────────────────────────────────── */
 .spinner {
-  width: 18px;
-  height: 18px;
+  display: inline-block;
+  width: 17px;
+  height: 17px;
   border-radius: 9999px;
-  border: 2px solid rgba(255,255,255,.42);
+  border: 2.5px solid rgba(255,255,255,.38);
   border-top-color: white;
-  animation: spin .75s linear infinite;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
 }
 .spinner-dark {
-  border-color: rgba(5,121,100,.25);
+  border-color: rgba(5,121,100,.22);
   border-top-color: var(--mint);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Dropdown / select chevron fix ──────────────────────────────────────────── */
+/* Any element using ⌄ as a chevron indicator */
+[data-chevron], .chevron-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+}
+
+/* ── Bottom sheet / nav ─────────────────────────────────────────────────────── */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100vw, 430px);
+  border-radius: 24px 24px 0 0;
+  background: var(--card);
+  padding: 12px 18px calc(18px + env(safe-area-inset-bottom));
+  box-shadow: 0 -6px 30px rgba(0,0,0,.12);
+}
+.dark .bottom-sheet {
+  box-shadow: 0 -6px 30px rgba(0,0,0,.4);
+}
+
+/* Sheet drag pill */
+.sheet-pill {
+  width: 40px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--line);
+  margin: 0 auto 16px;
+}
+
+/* ── Loading overlay for page transitions ───────────────────────────────────── */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--background), .7);
+  backdrop-filter: blur(4px);
+}
